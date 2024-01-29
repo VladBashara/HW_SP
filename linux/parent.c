@@ -200,7 +200,7 @@ int main(int argc, char* argv[]) {
     fread(buf, 1, file_size, fp); // read file_size bytes from file to buffer
     fclose(fp);
     long M = count_str(buf, '.');
-    if (M < 2) { exit(EXIT_FAILURE); }
+    if (M < 2) { printf("ERROR: M < 2\n"); exit(EXIT_FAILURE); }
     
     
     int M_prcs;
