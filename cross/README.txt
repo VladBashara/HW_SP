@@ -1,3 +1,4 @@
 Команда для запуска:
 
-sh clear.sh && nodejs parent.js array 2 0
+sh clean.sh && nodejs parent.js array 2 0
+clean.bat && nodejs parent.js array 2 0
