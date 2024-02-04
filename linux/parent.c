@@ -11,7 +11,6 @@ int getIntSize(int n) {
     if (n == 0) { return 1; }
     int i = 0;
     while (n != 0) {
-        int last_num = n - ((int)(n / 10)*10);
         n = (int)(n / 10);
         i++;
     }
@@ -83,6 +82,7 @@ int count_str(char* buf, char symbol) {
     int i = 0;
     char* ptr = NULL;
     ptr = strchr(buf, (int)symbol);
+    if (ptr == NULL) { return 0; }
     buf = &ptr[1];
     while (ptr != NULL) {
         ptr = strchr(buf, (int)symbol);
@@ -119,7 +119,7 @@ void split_str(char* buf, long buf_size, char*** pos_list, long** size_list, int
     }
 }
     
-void write_slices_to_files(char* buf, long file_size, int N, int M_prcs, int M_last_prcs) {
+int write_slices_to_files(char* buf, long file_size, int N, int M_prcs, int M_last_prcs) {
     int len = 0;
     long* size_list = NULL;
     char** pos_list = NULL;
@@ -128,22 +128,25 @@ void write_slices_to_files(char* buf, long file_size, int N, int M_prcs, int M_l
 
     for (int j = 0; j < N-1; j++) {
         char file[] = "splitted_arrays/";
-        FILE* fp = fopen(strcat(file, i_to_a(j+1)), "wb");
+        FILE* fp = fopen(strcat(file, i_to_a(j+1)), "wb"); if (fp == NULL) { return 1; }
         for (int i = 0; i < M_prcs; i++) {
-            fwrite(pos_list[counter], 1, size_list[counter], fp);
+            fwrite(pos_list[counter], 1, size_list[counter], fp); if (ferror(fp)) { return 1; }
             counter++;
-            if (i != M_prcs-1) {fwrite(" ", 1, 1, fp);}
+            if (i != M_prcs-1) { fwrite(" ", 1, 1, fp); }
         }
-        fclose(fp);
+        if (fclose(fp)) { return 1; }
     }
     char file[] = "splitted_arrays/";
     FILE* fp = fopen(strcat(file, i_to_a(N)), "wb");
     for (int i = 0; i < M_last_prcs; i++) {
-        fwrite(pos_list[counter], 1, size_list[counter], fp);
+        fwrite(pos_list[counter], 1, size_list[counter], fp); if (ferror(fp)) { return 1; }
         counter++;
-        if (i != M_last_prcs-1) {fwrite(" ", 1, 1, fp);}
+        if (i != M_last_prcs-1) { fwrite(" ", 1, 1, fp); if (ferror(fp)) { return 1; } }
     }
-    fclose(fp);
+    // free(pos_list[0]); // Funny thing xD
+    printf("DEBUG2\n");
+    free(size_list);
+    if (fclose(fp)) { return 1; }
 
     // for (int j = 0; j < len-1; j++) {
     //     char file[] = "splitted_arrays/";
@@ -161,6 +164,8 @@ void write_slices_to_files(char* buf, long file_size, int N, int M_prcs, int M_l
     // fclose(fp);
     // free(size_list);
     // free(pos_list);
+    printf("DEBUG3\n");
+    return 0;
 }
 
 void waiting_all_proccesses(int N, char* delay_str) {
@@ -198,9 +203,18 @@ int main(int argc, char* argv[]) {
 
     char* buf = malloc(file_size * sizeof(char));
     fread(buf, 1, file_size, fp); // read file_size bytes from file to buffer
-    fclose(fp);
+    if (ferror(fp)) {
+        free(buf);
+        print_error_msg("Can`t read the file");
+        exit(EXIT_FAILURE);
+    }
+    if (fclose(fp)) {
+        free(buf);
+        print_error_msg("Can`t close the file");
+        exit(EXIT_FAILURE);
+    }
     long M = count_str(buf, '.');
-    if (M < 2) { printf("ERROR: M < 2\n"); exit(EXIT_FAILURE); }
+    if (M < 2) { printf("ERROR: M < 2\n"); free(buf); exit(EXIT_FAILURE); }
     
     
     int M_prcs;
@@ -209,20 +223,32 @@ int main(int argc, char* argv[]) {
     printf("M - data: %ld\n", M);
     printf("N - subproccesses: %d\n\n", N);
     
-    write_slices_to_files(buf, file_size, N, M_prcs, M_last_prcs);
+    if (write_slices_to_files(buf, file_size, N, M_prcs, M_last_prcs)) {
+        printf("DEBUGxd\n");
+        free(buf);
+        print_error_msg("");
+        exit(EXIT_FAILURE);
+    }
     free(buf);
     calling_proccesses(N, delay_str);
     waiting_all_proccesses(N, delay_str);
-    printf("OKAY\n");
     double result = 0;
     for (int i = 0; i < N; i++)  { // summation
         char folder[] = "summed_arrays/";
         printf("OKAY\n");
         FILE* fp = fopen(strcat(folder, i_to_a(i+1)), "rb");
+        if (ferror(fp)) {
+            
+            exit(EXIT_FAILURE);
+        }
         long file_size = get_file_size(fp);
         buf = malloc(file_size * sizeof(char));
         printf("OKAY\n");
         fread(buf, 1, file_size, fp);
+        if (ferror(fp)) {
+            free(buf);
+            exit(EXIT_FAILURE);
+        }
 
         if (i == 0) {
             printf("file_size: %ld\n", file_size);
@@ -248,7 +274,10 @@ int main(int argc, char* argv[]) {
         printf("atof(result_str) %f\n", atof(result_str));
         free(buf);
         free(result_str);
-        fclose(fp);
+        if (fclose(fp)) {
+            print_error_msg("Can`t close the file");
+            exit(EXIT_FAILURE);
+        }
     }
     printf("\nResult = %f\n", result);
 

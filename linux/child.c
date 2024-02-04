@@ -11,7 +11,6 @@ int getIntSize(int n) {
     if (n == 0) { return 1; }
     int i = 0;
     while (n != 0) {
-        int last_num = n - ((int)(n / 10)*10);
         n = (int)(n / 10);
         i++;
     }
