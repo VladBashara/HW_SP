@@ -55,20 +55,6 @@ void calc(int M, int* N, int* M_prcs, int* M_last_prcs) {
     *M_last_prcs = M - (*N-1)*(M / *N);
 }
 
-// void write_slices_to_files(char* buf, int N, int M_prcs, int M_last_prcs) {
-//     FILE* fp;
-//     for (int i = 0; i < N-1; i++) { // writing slices of array to new files for N-1 proccesses
-//         char folder[] = "splitted_arrays/";
-//         fp = fopen(strcat(folder, i_to_a(i+1)), "wb");
-//         fwrite(&buf[i*M_prcs], 1, M_prcs, fp);
-//         fclose(fp);
-//     }
-//     char folder[] = "splitted_arrays/";
-//     fp = fopen(strcat(folder, i_to_a(N)) , "wb"); // writing slices of array to new files for N (last) proccess
-//     fwrite(&buf[(N-1)*M_prcs], 1, M_last_prcs, fp);
-//     fclose(fp);
-// }
-
 int count_str(char* buf, char symbol) {
     int i = 0;
     char* ptr = NULL;
@@ -85,9 +71,7 @@ int count_str(char* buf, char symbol) {
 
 void split_str(char* buf, long buf_size, char*** pos_list, long** size_list, int* len) {
     *len = count_str(buf, '.');
-    printf("*len: %d\n", *len);
-    printf("buf: %s\n", buf);
-    if (*len == 0) { printf("ERROR"); }
+    if (*len == 0) { printf("ERROR?"); }
     *size_list = malloc(*len * sizeof(long));
     *pos_list = malloc(*len * sizeof(char*));
 
@@ -98,15 +82,11 @@ void split_str(char* buf, long buf_size, char*** pos_list, long** size_list, int
         (*pos_list)[i] = buf;
         ptr = strchr(buf, (int)symbol);
         if (ptr == NULL) {
-            printf("len: %ld\n", buf_size-(long)buf+start_pos);
             (*size_list)[i] =  buf_size-(long)buf+start_pos;
         } else {
             (*size_list)[i] = (long)ptr-(long)buf;
             buf = &ptr[1];
         }
-
-        printf("\npos_list[%d]: %c\n", i, (**pos_list)[i]);
-        printf("size_list[%d]: %ld\n", i, (*size_list)[i]);
     }
 }
     
@@ -134,28 +114,8 @@ int write_slices_to_files(char* buf, long file_size, int N, int M_prcs, int M_la
         counter++;
         if (i != M_last_prcs-1) { fwrite(" ", 1, 1, fp); if (ferror(fp)) { return 1; } }
     }
-    // free(pos_list[0]); // Funny thing xD
-    printf("DEBUG2\n");
     free(size_list);
     if (fclose(fp)) { return 1; }
-
-    // for (int j = 0; j < len-1; j++) {
-    //     char file[] = "splitted_arrays/";
-    //     FILE* fp = fopen(strcat(file, i_to_a(j+1)), "wb");
-    //     fwrite(pos_list[j], 1, size_list[j], fp);
-    //     fwrite(" ", 1, 1, fp);
-    //     fwrite(pos_list[j+1], 1, size_list[j+1], fp);
-    //     fclose(fp);
-    // }
-    // char file[] = "splitted_arrays/";
-    // FILE* fp = fopen(strcat(file, i_to_a(len)), "wb");
-    // fwrite(pos_list[len-1], 1, size_list[len-1], fp);
-    // fwrite(" ", 1, 1, fp);
-    // fwrite(pos_list[len], 1, size_list[len], fp);
-    // fclose(fp);
-    // free(size_list);
-    // free(pos_list);
-    printf("DEBUG3\n");
     return 0;
 }
 
@@ -163,7 +123,7 @@ void waiting_all_proccesses(int N, char* delay_str) {
     int ret_code;
     printf("parent sleep(%d)\n", 4*atoi(delay_str));
     sleep(4*atoi(delay_str));
-    for (int j = 0; j < N; j++) { // waiting until all proccesses will ended
+    for (int j = 0; j < N; j++) {
         pid_t ret_wait = wait(&ret_code);
     }
 }
@@ -177,9 +137,3 @@ void calling_proccesses(int N, char* delay_str) {
         }
     }
 }
-
-// void separate_str_by_space(char* str, int str_size, char** list) { // TODO: ADD ARRAY LENGHT ARG
-//     for (int i = 0; i < str_size; i++) { 
-        
-//     }
-// }

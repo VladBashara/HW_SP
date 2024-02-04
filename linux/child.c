@@ -18,11 +18,6 @@ int main(int argc, char* argv[]) {
     FILE* fp = fopen(strcat(folder_read, file_name), "rb");
     double result = 0;
     char* buf = malloc(get_file_size(fp) * sizeof(char));
-
-    // for (int i = 0; i < get_file_size(fp); i++) {
-    //     fread(&buf, sizeof(char), 1, fp);
-    //     if (isdigit(buf)) { result++; }
-    // }
     fread(buf, sizeof(char), get_file_size(fp), fp);
 
     int len = 0;
