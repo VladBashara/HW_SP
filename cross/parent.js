@@ -1,6 +1,8 @@
 console.log("Hello guys");
-let fs = require('fs');
-fs.appendFile('new_file', '', function (err) {
+const fs = require('fs');
+const { exit } = require('process');
+fs.appendFile('new_file2', '', function (err) {
     if (err) throw err;
     console.log('Saved!');
   }); 
+  exit(0);
