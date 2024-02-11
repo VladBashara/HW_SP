@@ -8,10 +8,21 @@
 #include <ctype.h>
 #include "module.c"
 
+#define ARGC 4
+
 int main(int argc, char* argv[]) {
 
-    check_if_argc_equal_to(argc, 4);
-    FILE* fp = check_if_file_exists(argv[1]);
+    if (argc != ARGC) {
+        printf("ERROR: argc != %d\n", ARGC);
+        exit(EXIT_FAILURE);
+    }
+
+    FILE* fp = fopen(argv[1], "rb");
+    if (fp == NULL) {
+        print_error_msg("file doesn`t exist");
+        exit(EXIT_FAILURE);
+    }
+
     char* delay_str = argv[3];
     long file_size = get_file_size(fp);
     int N = atoi(argv[2]);
@@ -34,7 +45,13 @@ int main(int argc, char* argv[]) {
     
     int M_prcs;
     int M_last_prcs;
-    calc(M, &N, &M_prcs, &M_last_prcs);
+    if (N > M/2) {
+        N = M/2;
+        printf("Warning: N = M//2\n");
+    }
+    M_prcs = M / N;
+    M_last_prcs = M - (N-1)*(M / N);
+
     printf("M - data: %ld\n", M);
     printf("N - subproccesses: %d\n\n", N);
     
