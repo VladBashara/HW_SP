@@ -12,22 +12,6 @@ void print_error_msg(char* add_msg) {
     printf("%d : %s (%s)\n", errno, strerror(errno), add_msg);
 }
 
-void check_if_argc_equal_to(int argc, int n) {
-    if (argc != n) {
-        printf("ERROR: argc != %d\n", n);
-        exit(EXIT_FAILURE);
-    }
-}
-
-FILE* check_if_file_exists(char* argv_1) {
-    FILE* fp = fopen(argv_1, "rb");
-    if (fp == NULL) {
-        print_error_msg("file doesn`t exist");
-        exit(EXIT_FAILURE);
-    }
-    return fp;
-}
-
 long get_file_size(FILE* fp) {
     fseek(fp, 0, SEEK_CUR);
     long offset = ftell(fp);
@@ -35,24 +19,6 @@ long get_file_size(FILE* fp) {
     long size = ftell(fp);
     fseek(fp, offset, SEEK_SET);
     return size;
-}
-
-long check_file_size(FILE* fp) {
-    long file_size = get_file_size(fp);
-    if (file_size < 2) {
-        printf("ERROR: file_size < 2\n");
-        exit(EXIT_FAILURE);
-    }
-    return file_size;
-}
-
-void calc(int M, int* N, int* M_prcs, int* M_last_prcs) {
-    if (*N > M/2) {
-        *N = M/2;
-        printf("Warning: N = M//2\n");
-    }
-    *M_prcs = M / *N;
-    *M_last_prcs = M - (*N-1)*(M / *N);
 }
 
 int count_str(char* buf, char symbol) {
