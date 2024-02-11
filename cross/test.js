@@ -1,14 +1,21 @@
-var cluster = require('cluster');
-var http = require('http');
-var numCPUs = 4;
-console.log('PID: ' + process.pid);
-if (cluster.isMaster) {
- for (var i = 0; i < numCPUs; i++) {
-  cluster.fork();
- }
-} else {
- http.createServer(function(req, res) {
-  res.writeHead(200);
-  res.end('process ' + process.pid + ' says hello!');
- }).listen(8000);
-}
+// let promise = new Promise(function(resolve, reject) {
+//     console.log("Make Promise");
+//     setTimeout(() => { reject(new Error("adads")); }, 10);
+//     setTimeout(() => { console.log("promise.status: " + this.status); }, 1000);
+//     setTimeout(() => { console.log("promise.result: " + this.result); }, 1000);
+// });
+// promise.finally(
+//     function() { console.log("Make error "); }
+// ).catch(function() { console.log("End"); });
+
+// let res = Promise.allSettled([
+//     new Promise(function(resolve, reject) { resolve('100'); }),
+//     new Promise(function(resolve, reject) { reject(new Error('400')); }),
+// ]);
+
+// res.then((results) => { results.forEach(result => { console.log("result.status " + result.status);
+//                                                     if (result.status == "fulfilled") {
+//                                                         console.log("result.value " + result.value);
+//                                                     } else {
+//                                                         console.log("result.reason " + result.reason);
+//                                                     } }); });
