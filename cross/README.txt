@@ -2,3 +2,6 @@
 
 sh clean.sh && nodejs parent.js array 2 0
 clean.bat && nodejs parent.js array 2 0
+
+python3 gen.py <filename> <left_edge> <right_edge> <NumCount>
+python3 gen.py generated 0 20 5
