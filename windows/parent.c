@@ -1,9 +1,11 @@
 #include <stdio.h>
-#include <unistd.h>
+// #include <unistd.h>
+#include <synchapi.h>
+#include <windows.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-#include <sys/wait.h>
+// #include <sys/wait.h>
 #include "itoa.c"
 #include <ctype.h>
 #include "module.c"
@@ -14,13 +16,15 @@ int main(int argc, char* argv[]) {
 
     if (argc != ARGC) {
         printf("ERROR: argc != %d\n", ARGC);
-        exit(EXIT_FAILURE);
+        // exit(EXIT_FAILURE);
+        ExitProcess(1);
     }
 
     FILE* fp = fopen(argv[1], "rb");
     if (fp == NULL) {
         print_error_msg("file doesn`t exist");
-        exit(EXIT_FAILURE);
+        // exit(EXIT_FAILURE);
+        ExitProcess(1);
     }
 
     char* delay_str = argv[3];
@@ -32,12 +36,14 @@ int main(int argc, char* argv[]) {
     if (ferror(fp)) {
         free(buf);
         print_error_msg("Can`t read the file");
-        exit(EXIT_FAILURE);
+        // exit(EXIT_FAILURE);
+        ExitProcess(1);
     }
     if (fclose(fp)) {
         free(buf);
         print_error_msg("Can`t close the file");
-        exit(EXIT_FAILURE);
+        // exit(EXIT_FAILURE);
+        ExitProcess(1);
     }
     long M = count_str(buf, '.');
     if (M < 2) { free(buf); printf("ERROR: M < 2\n"); exit(EXIT_FAILURE); }
@@ -58,18 +64,24 @@ int main(int argc, char* argv[]) {
     if (write_slices_to_files(buf, file_size, N, M_prcs, M_last_prcs)) {
         free(buf);
         print_error_msg("write_slices error");
-        exit(EXIT_FAILURE);
+        // exit(EXIT_FAILURE);
+        ExitProcess(1);
     }
     free(buf);
-    calling_proccesses(N, delay_str);
-    waiting_all_proccesses(N, delay_str);
+    HANDLE* proc_descriptors = malloc(N * sizeof(HANDLE*));
+    HANDLE* thr_descriptors = malloc(N * sizeof(HANDLE*));
+    calling_proccesses(N, delay_str, proc_descriptors, thr_descriptors);
+    waiting_all_proccesses(N, delay_str, proc_descriptors, thr_descriptors);
+    free(proc_descriptors);
+    free(thr_descriptors);
     double result = 0;
     for (int i = 0; i < N; i++)  {
         char folder[] = "summed_arrays/";
         FILE* fp = fopen(strcat(folder, i_to_a(i+1)), "rb");
         if (fp == NULL) {
             print_error_msg("");
-            exit(EXIT_FAILURE);
+            // exit(EXIT_FAILURE);
+            ExitProcess(1);
         }
         long file_size = get_file_size(fp);
         buf = malloc(file_size * sizeof(char));
@@ -77,7 +89,8 @@ int main(int argc, char* argv[]) {
         if (ferror(fp)) {
             free(buf);
             print_error_msg("Can`t read from file");
-            exit(EXIT_FAILURE);
+            // exit(EXIT_FAILURE);
+            ExitProcess(1);
         }
         char* result_str = malloc(file_size * sizeof(char));
         strncpy(result_str, buf, file_size);
@@ -87,10 +100,12 @@ int main(int argc, char* argv[]) {
         free(result_str);
         if (fclose(fp)) {
             print_error_msg("Can`t close the file");
-            exit(EXIT_FAILURE);
+            // exit(EXIT_FAILURE);
+            ExitProcess(1);
         }
     }
     printf("\nResult = %f\n", result);
 
-    exit(EXIT_SUCCESS);
+    // exit(EXIT_SUCCESS);
+    ExitProcess(0);
 }

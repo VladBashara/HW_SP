@@ -1,3 +1,6 @@
+#include <synchapi.h>
+#include <windows.h>
+
 int getIntSize(int n) {
     if (n == 0) { return 1; }
     int i = 0;
@@ -9,7 +12,11 @@ int getIntSize(int n) {
 }
 
 void print_error_msg(char* add_msg) {
-    printf("%d : %s (%s)\n", errno, strerror(errno), add_msg);
+    // printf("%d : %s (%s)\n", errno, strerror(errno), add_msg);
+    char message[1000] = {0};
+    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER, NULL,
+                GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&message, 0, NULL);
+    printf("%d : %s (%s)\n", GetLastError(), message, add_msg);
 }
 
 long get_file_size(FILE* fp) {
@@ -37,7 +44,7 @@ int count_str(char* buf, char symbol) {
 
 void split_str(char* buf, long buf_size, char*** pos_list, long** size_list, int* len) {
     *len = count_str(buf, '.');
-    if (*len == 0) { printf("ERROR?"); }
+    if (*len == 0) { printf("ERROR?\n"); }
     *size_list = malloc(*len * sizeof(long));
     *pos_list = malloc(*len * sizeof(char*));
 
@@ -85,21 +92,29 @@ int write_slices_to_files(char* buf, long file_size, int N, int M_prcs, int M_la
     return 0;
 }
 
-void waiting_all_proccesses(int N, char* delay_str) {
+void waiting_all_proccesses(int N, char* delay_str,  HANDLE** proc_descriptors,  HANDLE** thr_descriptors) {
     int ret_code;
     printf("parent sleep(%d)\n", 4*atoi(delay_str));
-    sleep(4*atoi(delay_str));
+    Sleep(1000*4*atoi(delay_str));
+    DWORD exit_code;
     for (int j = 0; j < N; j++) {
-        pid_t ret_wait = wait(&ret_code);
+        // pid_t ret_wait = wait(&ret_code);
+        if (WaitForSingleObject((*proc_descriptors)[j], INFINITE) == WAIT_FAILED) { printf("ERROR\n"); }
+        if (!GetExitCodeProcess((*proc_descriptors)[j], &exit_code)) { printf("ERROR\n"); }
+        if (exit_code == 1) { printf("ERROR\n"); }
+        CloseHandle((*proc_descriptors)[j]);
+        CloseHandle((*thr_descriptors)[j]);
     }
 }
 
-void calling_proccesses(int N, char* delay_str) {
+void calling_proccesses(int N, char* delay_str, HANDLE** proc_descriptors, HANDLE** thr_descriptors) {
     for (int i = 0; i < N; i++) {
-        pid_t ret_fork = fork();
-        if (ret_fork == 0) {
-            char* argv[3] = {i_to_a(i+1), delay_str, NULL};
-            execve("./child", argv, NULL);
-        }
+        PROCESS_INFORMATION pi;
+        STARTUPINFO si;
+        GetStartupInfo(&si);
+        char* argv[3] = {i_to_a(i+1), delay_str, NULL};
+        BOOL res = CreateProcess( "child.exe", argv, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
+        (*proc_descriptors)[i] = pi.hProcess;
+        (*thr_descriptors)[i] = pi.hThread;
     }
 }

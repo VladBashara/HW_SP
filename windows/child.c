@@ -1,9 +1,11 @@
 #include <stdio.h>
-#include <unistd.h>
+// #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-#include <sys/wait.h>
+#include <synchapi.h>
+#include <windows.h>
+// #include <sys/wait.h>
 #include "itoa.c"
 #include <ctype.h>
 #include "module.c"
@@ -43,5 +45,6 @@ int main(int argc, char* argv[]) {
     free(size_list);
     free(pos_list);
     free(result_str);
-    exit(EXIT_SUCCESS);
+    // exit(EXIT_SUCCESS);
+    ExitProcess(0);
 }
