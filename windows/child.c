@@ -12,12 +12,14 @@
 
 int main(int argc, char* argv[]) {
     printf("child sleep(%d)\n", atoi(argv[1]));
-    sleep(atoi(argv[1]));
+    Sleep(1000*atoi(argv[1]));
     char folder_read[] = "splitted_arrays/";
     char folder_write[] = "summed_arrays/";
-    char* file_name = malloc(strlen(argv[0]) * sizeof(char)); 
+    char* file_name = malloc(strlen(argv[0]) * sizeof(char));
+    printf("argv: %s\n", argv[0]);
     strcpy(file_name, argv[0]);
     FILE* fp = fopen(strcat(folder_read, file_name), "rb");
+    if (fp == NULL) { printf("folder: %s\n", folder_read); }
     double result = 0;
     char* buf = malloc(get_file_size(fp) * sizeof(char));
     fread(buf, sizeof(char), get_file_size(fp), fp);
@@ -38,7 +40,11 @@ int main(int argc, char* argv[]) {
     char* result_str = malloc(1000 * sizeof(char));
     gcvt(result, 1000, result_str);
     fp = fopen(strcat(folder_write, file_name), "wb");
-    fwrite(result_str, 1, strlen(result_str), fp);
+    if (fp == NULL) { printf("ERROR\n"); }
+    printf("folder: %s\n", folder_write);
+    printf("result_str: %s\n", result_str);
+    printf("hello there\n");
+    if (fwrite(result_str, 1, strlen(result_str), fp) < strlen(result_str)) { printf("ERROR 47\n"); }
     fclose(fp);
     free(file_name);
     free(buf);
