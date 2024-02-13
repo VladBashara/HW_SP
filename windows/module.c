@@ -13,9 +13,9 @@ int getIntSize(int n) {
 
 void print_error_msg(char* add_msg) {
     // printf("%d : %s (%s)\n", errno, strerror(errno), add_msg);
-    char message[1000] = {0};
+    LPSTR message;
     FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER, NULL,
-                GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&message, 0, NULL);
+                GetLastError(), MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT), message, 0, NULL);
     printf("%d : %s (%s)\n", GetLastError(), message, add_msg);
 }
 
@@ -48,16 +48,16 @@ void split_str(char* buf, long buf_size, char*** pos_list, long** size_list, int
     *size_list = malloc(*len * sizeof(long));
     *pos_list = malloc(*len * sizeof(char*));
 
-    long start_pos = (long)buf;
+    long long start_pos = (long long)buf;
     char symbol = ' ';
     char* ptr = NULL;
     for (int i = 0; i < *len; i++) {
         (*pos_list)[i] = buf;
-        ptr = strchr(buf, (int)symbol);
+        ptr = strchr(buf, (long long)symbol);
         if (ptr == NULL) {
-            (*size_list)[i] =  buf_size-(long)buf+start_pos;
+            (*size_list)[i] =  buf_size-(long long)buf+start_pos;
         } else {
-            (*size_list)[i] = (long)ptr-(long)buf;
+            (*size_list)[i] = (long long)ptr-(long long)buf;
             buf = &ptr[1];
         }
     }
@@ -92,29 +92,37 @@ int write_slices_to_files(char* buf, long file_size, int N, int M_prcs, int M_la
     return 0;
 }
 
-void waiting_all_proccesses(int N, char* delay_str,  HANDLE** proc_descriptors,  HANDLE** thr_descriptors) {
+void waiting_all_proccesses(int N, char* delay_str,  HANDLE* proc_descriptors,  HANDLE* thr_descriptors) {
     int ret_code;
     printf("parent sleep(%d)\n", 4*atoi(delay_str));
     Sleep(1000*4*atoi(delay_str));
-    DWORD exit_code;
+    DWORD exit_code = 0;
     for (int j = 0; j < N; j++) {
         // pid_t ret_wait = wait(&ret_code);
-        if (WaitForSingleObject((*proc_descriptors)[j], INFINITE) == WAIT_FAILED) { printf("ERROR\n"); }
-        if (!GetExitCodeProcess((*proc_descriptors)[j], &exit_code)) { printf("ERROR\n"); }
-        if (exit_code == 1) { printf("ERROR\n"); }
-        CloseHandle((*proc_descriptors)[j]);
-        CloseHandle((*thr_descriptors)[j]);
+        if (WaitForSingleObject(proc_descriptors[j], INFINITE) == WAIT_FAILED) { printf("ERROR 102\n"); }
+        if (!GetExitCodeProcess(proc_descriptors[j], &exit_code)) { printf("ERROR 103\n"); }
+        if (exit_code == 1) { printf("ERROR 104\n"); }
+        CloseHandle(proc_descriptors[j]);
+        CloseHandle(thr_descriptors[j]);
     }
 }
 
-void calling_proccesses(int N, char* delay_str, HANDLE** proc_descriptors, HANDLE** thr_descriptors) {
+void calling_proccesses(int N, char* delay_str, HANDLE* proc_descriptors, HANDLE* thr_descriptors) {
     for (int i = 0; i < N; i++) {
         PROCESS_INFORMATION pi;
         STARTUPINFO si;
         GetStartupInfo(&si);
-        char* argv[3] = {i_to_a(i+1), delay_str, NULL};
-        BOOL res = CreateProcess( "child.exe", argv, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
-        (*proc_descriptors)[i] = pi.hProcess;
-        (*thr_descriptors)[i] = pi.hThread;
+        // char* argv[3] = {i_to_a(i+1), delay_str, NULL};
+        char* argv = calloc((strlen(i_to_a(i+1)) + 1 + strlen(delay_str) + 1), sizeof(char));
+        strcat(argv, i_to_a(i+1));
+        strcat(argv, " ");
+        strcat(argv, delay_str);
+        printf("i_to_a(i+1): %s\n", i_to_a(i+1));
+        printf("delay_str: %s\n", delay_str);
+        printf("ARGV: %s\n", argv);
+        BOOL res = CreateProcess( "child.exe", (LPSTR)argv, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
+        free(argv);
+        proc_descriptors[i] = pi.hProcess;
+        thr_descriptors[i] = pi.hThread;
     }
 }
