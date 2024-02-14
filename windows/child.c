@@ -38,12 +38,12 @@ int main(int argc, char* argv[]) {
     };
 
     char* result_str = malloc(1000 * sizeof(char));
-    gcvt(result, 1000, result_str);
-    fp = fopen(strcat(folder_write, file_name), "wb");
+    gcvt(result, 100, result_str);
+    fp = fopen(strcat(folder_write, file_name), "w");
     if (fp == NULL) { printf("ERROR\n"); }
-    printf("folder: %s\n", folder_write);
-    printf("result_str: %s\n", result_str);
-    printf("hello there\n");
+    // printf("folder: %s\n", folder_write);
+    // printf("result_str: %s\n", result_str);
+    // printf("hello there\n");
     if (fwrite(result_str, 1, strlen(result_str), fp) < strlen(result_str)) { printf("ERROR 47\n"); }
     fclose(fp);
     free(file_name);
