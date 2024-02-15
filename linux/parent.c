@@ -52,8 +52,8 @@ int main(int argc, char* argv[]) {
     M_prcs = M / N;
     M_last_prcs = M - (N-1)*(M / N);
 
-    printf("M - data: %ld\n", M);
-    printf("N - subproccesses: %d\n\n", N);
+    printf("M - data size: %ld\n", M);
+    printf("N - child processes: %d\n", N);
     
     if (write_slices_to_files(buf, file_size, N, M_prcs, M_last_prcs)) {
         free(buf);

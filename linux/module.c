@@ -37,7 +37,6 @@ int count_str(char* buf, char symbol) {
 
 void split_str(char* buf, long buf_size, char*** pos_list, long** size_list, int* len) {
     *len = count_str(buf, '.');
-    if (*len == 0) { printf("ERROR?"); }
     *size_list = malloc(*len * sizeof(long));
     *pos_list = malloc(*len * sizeof(char*));
 
@@ -87,7 +86,6 @@ int write_slices_to_files(char* buf, long file_size, int N, int M_prcs, int M_la
 
 void waiting_all_proccesses(int N, char* delay_str) {
     int ret_code;
-    printf("parent sleep(%d)\n", 4*atoi(delay_str));
     sleep(4*atoi(delay_str));
     for (int j = 0; j < N; j++) {
         pid_t ret_wait = wait(&ret_code);
