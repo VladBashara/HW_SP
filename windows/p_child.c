@@ -1,25 +1,25 @@
 #include <stdio.h>
-// #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 #include <synchapi.h>
 #include <windows.h>
-// #include <sys/wait.h>
 #include "itoa.c"
 #include <ctype.h>
 #include "module.c"
 
 int main(int argc, char* argv[]) {
-    printf("child sleep(%d)\n", atoi(argv[1]));
     Sleep(1000*atoi(argv[1]));
     char folder_read[] = "splitted_arrays/";
     char folder_write[] = "summed_arrays/";
     char* file_name = malloc(strlen(argv[0]) * sizeof(char));
-    printf("argv: %s\n", argv[0]);
     strcpy(file_name, argv[0]);
     FILE* fp = fopen(strcat(folder_read, file_name), "rb");
-    if (fp == NULL) { printf("folder: %s\n", folder_read); }
+    if (fp == NULL) {
+        free(file_name);
+        fclose(fp);
+        ExitProcess(1);
+    }
     double result = 0;
     char* buf = malloc(get_file_size(fp) * sizeof(char));
     fread(buf, sizeof(char), get_file_size(fp), fp);
@@ -40,17 +40,17 @@ int main(int argc, char* argv[]) {
     char* result_str = malloc(1000 * sizeof(char));
     gcvt(result, 100, result_str);
     fp = fopen(strcat(folder_write, file_name), "w");
-    if (fp == NULL) { printf("ERROR\n"); }
-    // printf("folder: %s\n", folder_write);
-    // printf("result_str: %s\n", result_str);
-    // printf("hello there\n");
-    if (fwrite(result_str, 1, strlen(result_str), fp) < strlen(result_str)) { printf("ERROR 47\n"); }
+    if (fp == NULL) {
+        free(result_str);
+        fclose(fp);
+        ExitProcess(1);
+    }
+    if (fwrite(result_str, 1, strlen(result_str), fp) < strlen(result_str)) {}
     fclose(fp);
     free(file_name);
     free(buf);
     free(size_list);
     free(pos_list);
     free(result_str);
-    // exit(EXIT_SUCCESS);
     ExitProcess(0);
 }
