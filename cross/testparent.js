@@ -130,4 +130,4 @@ for (i; i < N-1; i++) {
 write_numbers_to_file(`./splitted_arrays/${N}`, data_lst.slice(i*M_prcs, data_lst.length));
 
 let child_proc = call_subprocesses(N, 1);
-wait_subprocesses(N, child_proc).then(() => {summation(N)}).catch(() => {console.log("ERROR")});
+wait_subprocesses(N, child_proc).then(() => {summation(N)}).catch((error) => {console.log("ERROR ", error)});
