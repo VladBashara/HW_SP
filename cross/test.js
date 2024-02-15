@@ -30,3 +30,19 @@
 //     console.log("Third then"); setTimeout(()=>{}, 0); 
 // });
 // console.log("EXIT");
+
+// const lib = require("process");
+// function f() {
+//     return Promise.reject();
+// }
+
+// f().then(() => {console.log("NONONOON");})
+// process.on("uncaughtException", () => {console.log("KEK");});
+
+
+function wait_subprocesses() {
+    return Promise.resolve("99");
+}
+
+let ggg = wait_subprocesses();
+ggg.then(res => {console.log("res ", res)});
