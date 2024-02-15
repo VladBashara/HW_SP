@@ -11,4 +11,4 @@ let data_lst = data.split(' ');
 let result = 0;
 data_lst.forEach((num) => { result += Number(num); });
 fs.writeFileSync("./summed_arrays/" + file_num, String(result)); // exit(1)
-exit(0);
+setTimeout(() => { console.log("exit(0)"); exit(0); }, 10);
