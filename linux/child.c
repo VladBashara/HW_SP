@@ -9,7 +9,6 @@
 #include "module.c"
 
 int main(int argc, char* argv[]) {
-    printf("child sleep(%d)\n", atoi(argv[1]));
     sleep(atoi(argv[1]));
     char folder_read[] = "splitted_arrays/";
     char folder_write[] = "summed_arrays/";
