@@ -12,11 +12,10 @@ int getIntSize(int n) {
 }
 
 void print_error_msg(char* add_msg) {
-    // printf("%d : %s (%s)\n", errno, strerror(errno), add_msg);
     LPSTR message;
-    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER, NULL,
-                GetLastError(), MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT), message, 0, NULL);
-    printf("%d : %s (%s)\n", GetLastError(), message, add_msg);
+    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER, NULL, GetLastError(),
+    MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT), (LPSTR)&message, 0, NULL);
+    printf("%d : (%s) %s\n", GetLastError(), add_msg, message);
 }
 
 long get_file_size(FILE* fp) {
@@ -44,7 +43,6 @@ int count_str(char* buf, char symbol) {
 
 void split_str(char* buf, long buf_size, char*** pos_list, long** size_list, int* len) {
     *len = count_str(buf, '.');
-    if (*len == 0) { printf("ERROR?\n"); }
     *size_list = malloc(*len * sizeof(long));
     *pos_list = malloc(*len * sizeof(char*));
 
@@ -94,11 +92,9 @@ int write_slices_to_files(char* buf, long file_size, int N, int M_prcs, int M_la
 
 void waiting_all_proccesses(int N, char* delay_str,  HANDLE* proc_descriptors,  HANDLE* thr_descriptors) {
     int ret_code;
-    printf("parent sleep(%d)\n", 4*atoi(delay_str));
     Sleep(1000*4*atoi(delay_str));
     DWORD exit_code = 0;
     for (int j = 0; j < N; j++) {
-        // pid_t ret_wait = wait(&ret_code);
         if (WaitForSingleObject(proc_descriptors[j], INFINITE) == WAIT_FAILED) { printf("ERROR 102\n"); }
         if (!GetExitCodeProcess(proc_descriptors[j], &exit_code)) { printf("ERROR 103\n"); }
         if (exit_code == 1) { printf("ERROR 104\n"); }
@@ -112,15 +108,11 @@ void calling_proccesses(int N, char* delay_str, HANDLE* proc_descriptors, HANDLE
         PROCESS_INFORMATION pi;
         STARTUPINFO si;
         GetStartupInfo(&si);
-        // char* argv[3] = {i_to_a(i+1), delay_str, NULL};
         char* argv = calloc((strlen(i_to_a(i+1)) + 1 + strlen(delay_str) + 1), sizeof(char));
         strcat(argv, i_to_a(i+1));
         strcat(argv, " ");
         strcat(argv, delay_str);
-        printf("i_to_a(i+1): %s\n", i_to_a(i+1));
-        printf("delay_str: %s\n", delay_str);
-        printf("ARGV: %s\n", argv);
-        BOOL res = CreateProcess( "child.exe", (LPSTR)argv, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
+        BOOL res = CreateProcess( "p_child.exe", (LPSTR)argv, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi);
         free(argv);
         proc_descriptors[i] = pi.hProcess;
         thr_descriptors[i] = pi.hThread;

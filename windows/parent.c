@@ -1,11 +1,9 @@
 #include <stdio.h>
-// #include <unistd.h>
 #include <synchapi.h>
 #include <windows.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-// #include <sys/wait.h>
 #include "itoa.c"
 #include <ctype.h>
 #include "module.c"
@@ -16,14 +14,12 @@ int main(int argc, char* argv[]) {
 
     if (argc != ARGC) {
         printf("ERROR: argc != %d\n", ARGC);
-        // exit(EXIT_FAILURE);
         ExitProcess(1);
     }
 
     FILE* fp = fopen(argv[1], "rb");
     if (fp == NULL) {
         print_error_msg("file doesn`t exist");
-        // exit(EXIT_FAILURE);
         ExitProcess(1);
     }
 
@@ -36,13 +32,11 @@ int main(int argc, char* argv[]) {
     if (ferror(fp)) {
         free(buf);
         print_error_msg("Can`t read the file");
-        // exit(EXIT_FAILURE);
         ExitProcess(1);
     }
     if (fclose(fp)) {
         free(buf);
         print_error_msg("Can`t close the file");
-        // exit(EXIT_FAILURE);
         ExitProcess(1);
     }
     long M = count_str(buf, '.');
@@ -58,13 +52,12 @@ int main(int argc, char* argv[]) {
     M_prcs = M / N;
     M_last_prcs = M - (N-1)*(M / N);
 
-    printf("M - data: %ld\n", M);
-    printf("N - subproccesses: %d\n\n", N);
+    printf("M - data size: %ld\n", M);
+    printf("N - child processes: %d\n\n", N);
     
     if (write_slices_to_files(buf, file_size, N, M_prcs, M_last_prcs)) {
         free(buf);
         print_error_msg("write_slices error");
-        // exit(EXIT_FAILURE);
         ExitProcess(1);
     }
     free(buf);
@@ -80,7 +73,6 @@ int main(int argc, char* argv[]) {
         FILE* fp = fopen(strcat(folder, i_to_a(i+1)), "rb");
         if (fp == NULL) {
             print_error_msg("");
-            // exit(EXIT_FAILURE);
             ExitProcess(1);
         }
         long file_size = get_file_size(fp);
@@ -89,7 +81,6 @@ int main(int argc, char* argv[]) {
         if (ferror(fp)) {
             free(buf);
             print_error_msg("Can`t read from file");
-            // exit(EXIT_FAILURE);
             ExitProcess(1);
         }
         char* result_str = malloc(file_size * sizeof(char));
@@ -100,12 +91,9 @@ int main(int argc, char* argv[]) {
         free(result_str);
         if (fclose(fp)) {
             print_error_msg("Can`t close the file");
-            // exit(EXIT_FAILURE);
             ExitProcess(1);
         }
     }
-    printf("\nResult = %f\n", result);
-
-    // exit(EXIT_SUCCESS);
+    printf("Result = %f\n", result);
     ExitProcess(0);
 }
