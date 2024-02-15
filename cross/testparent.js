@@ -17,21 +17,23 @@ function call_subprocesses(N, delay) {
     let child_proc = Array(N);
     for (let i = 0; i < N; i++) {
         child_proc[i] = child.fork("./testchild.js", [i+1, delay]);
+        console.log("PROC " + child_proc[i].pid);
     }
     return child_proc;
 }
 
-function wait_subprocesses(N, child_proc) {
+async function wait_subprocesses(N, child_proc) {
     let counter = 0;
     console.log("\nHERE\n");
     
     Promise.all(child_proc.map(x => {new Promise(
         () => {
             x.on("exit", (code) => {
-                if (code == 0) { resolve(''); } else { reject(''); }})
-        }
-    )}
-    )).then(() => {
+                console.log("EXIT ");
+                if (code == 0) { resolve(''); } else { reject(''); }
+                // resolve('');
+            })})}
+    )).finally(() => {
         return Promise.resolve('');
     }).catch(() => {
         return Promise.reject('');
