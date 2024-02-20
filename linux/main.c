@@ -62,8 +62,8 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 int read_file_to_buf(FILE* fp, long file_size, char** buf) {
     *buf = malloc((file_size+1) * sizeof(char));
-    fread(*buf, 1, file_size, fp);
-    buf[file_size] = "\0";
+    if (fread(*buf, 1, file_size, fp) < file_size) { printf("KEK\n");}
+    (*buf)[file_size] = '\0';
     if (ferror(fp)) {
         free(*buf);
         print_error_msg("Can`t read the file");
