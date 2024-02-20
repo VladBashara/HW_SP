@@ -10,8 +10,7 @@
 #include "itoa.c"
 #include "module.c"
 
-#define ARGC 3
-#define DELAY 10
+#define ARGC 4
 double sum = 0;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -79,9 +78,14 @@ int read_file_to_buf(FILE* fp, long file_size, char** buf) {
     return 0;
 }
 
-void* th_main(void* substrs_void) {
-    sleep(DELAY);
-    char* substrs = (char*)substrs_void;
+struct ARG {
+    int delay;
+    char* substr;
+};
+
+void* th_main(void* arg) {
+    sleep(((struct ARG*)arg)->delay);
+    char* substrs = (char*)(((struct ARG*)arg)->substr);
     int len = 0;
     int* size_list = NULL;
     char** pos_list = NULL;
@@ -143,7 +147,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     printf("PID: %d\n", getpid());
-    // char* delay_str = argv[3];
+    char* delay_str = argv[3];
 
     long file_size = get_file_size(fp);
     char* buf = NULL;
@@ -189,10 +193,13 @@ int main(int argc, char* argv[]) {
     // // pthread_t id[N];
     // // pthread_create(&(id[0]), NULL, th_main, (void *)(substrs[0]));
     // // pthread_create(&(id[0]),NULL, f, NULL);
+    struct ARG arg[N];
     for (int i = 0; i<N; i++) {
-        pthread_create(&id[i], NULL, th_main, (void *)(substr[i])); // ERROR
+        arg[i].delay = atoi(delay_str);
+        arg[i].substr = substr[i];
+        pthread_create(&id[i], NULL, th_main, (void *)&(arg[i])); // ERROR
     }
-    sleep(DELAY);
+    sleep(atoi(delay_str));
     for (int i = 0; i<N; i++) {
         void* th_ret;
         pthread_join(id[i], &th_ret);
