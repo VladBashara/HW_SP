@@ -55,7 +55,6 @@ void debug() {
 
 void split_str(char* buf, size_t buf_size, char*** pos_list, int** size_list, int* len) {
     *len = count_str(buf, '.');
-    printf("split_str len %d\n", *len);
     *size_list = malloc(*len * sizeof(int));
     *pos_list = malloc(*len * sizeof(char*));
 

@@ -62,7 +62,7 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 int read_file_to_buf(FILE* fp, long file_size, char** buf) {
     *buf = malloc((file_size+1) * sizeof(char));
-    if (fread(*buf, 1, file_size, fp) < file_size) { printf("KEK\n");}
+    if (fread(*buf, 1, file_size, fp) < file_size) { printf("ERROR\n");}
     (*buf)[file_size] = '\0';
     if (ferror(fp)) {
         free(*buf);
@@ -96,15 +96,12 @@ void* th_main(void* substrs_void) {
     int len = 0;
     int* size_list = NULL;
     char** pos_list = NULL;
-    printf("asdasdasdasdad\n");
-    printf("INFO %s\n", (char*)substrs_void);
     split_str(substrs, strlen(substrs), &pos_list, &size_list, &len);
     // printf("len: %d\n", len);
     pthread_mutex_lock(&mutex);
     for (int i = 0; i < len; i++) {
         char* val = malloc(size_list[i]);
         strncpy(val, pos_list[i], size_list[i]);
-        printf("%d val: %s   size: %d\n",i, val, size_list[i]);
         sum += atof(val);
         free(val);
     }
@@ -136,16 +133,10 @@ void get_substr(char*** substr, char** buf, long file_size, int N, int M_prcs, i
     int jmp_counter = 0;
     for (int j = 0; j < N; j++) {
         if (j == N-1) { jmp_counter = M_last_prcs; } else { jmp_counter = M_prcs; }
-        printf("jmp_counter: %d\n", jmp_counter);
         for (int i = 0; i < jmp_counter; i++) {
-            printf("OKAY %d\n", idx+1-start_const);
             idx = (long)strchr(&(*buf)[idx+1-start_const], (long)' ');
         }
-        printf("eror\n");
-        printf("(*buf)[start]: %c\n", (*buf)[start-start_const]);
-        printf("idx-start: %d\n", idx-start_const);
         strncpy((*substr)[j], &((*buf)[start-start_const]), idx-start);
-        printf("(*substr)[%d] %s\n", j, (*substr)[j]);
         start = idx + 1;
     }
 }
@@ -166,7 +157,6 @@ int main(int argc, char* argv[]) {
     char* delay_str = argv[3];
 
     long file_size = get_file_size(fp);
-    printf("file_size: %ld\n", file_size);
     char* buf = NULL;
     if (read_file_to_buf(fp, file_size, &buf)) { free(buf); return 1; }
 
@@ -183,10 +173,6 @@ int main(int argc, char* argv[]) {
     }
 
     get_substr(&substr, &buf, file_size, N, M_prcs, M_last_prcs);
-    
-    for (int i = 0; i < N; i++) {
-        printf("substr[%d]: %s\n", i, substr[i]);
-    }
 
     // free(buf);
     // for (int i = 0; i < N; i++) {
@@ -215,13 +201,11 @@ int main(int argc, char* argv[]) {
     // // pthread_create(&(id[0]), NULL, th_main, (void *)(substrs[0]));
     // // pthread_create(&(id[0]),NULL, f, NULL);
     for (int i = 0; i<N; i++) {
-        printf("last\n");
         pthread_create(&id[i], NULL, th_main, (void *)(substr[i])); // ERROR
     }
     for (int i = 0; i<N; i++) {
         void* th_ret;
         pthread_join(id[i], &th_ret);
-        printf("join %ld %d\n", id[i], *(int*)th_ret);
         free(th_ret);
     }
 
@@ -231,7 +215,7 @@ int main(int argc, char* argv[]) {
     free(substr);
     free(buf);
     free(id);
-    printf("sum is %f\n", sum);
+    printf("\nsum is %f\n", sum);
     // // int counter = 0;
     // // char** f = malloc(N * sizeof(char*));
     // // for (int i = 0; i<N; i++) {
