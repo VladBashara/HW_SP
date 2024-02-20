@@ -35,21 +35,43 @@ int count_str(char* buf, char symbol) {
     return i;
 }
 
-void split_str(char* buf, long buf_size, char*** pos_list, long** size_list, int* len) {
+int checkdebug(char* buf) {
+    char* expect = "6.6742358875";
+    int counter = 0;
+    for (int i = 0; i < strlen(expect); i++) {
+        if (buf[i] == expect[i]) {
+            counter++;
+        }
+    }
+    if (counter == strlen(expect)) {
+        return 1;
+    }
+    return 0;
+}
+
+void debug() {
+    printf("COOl\n");
+}
+
+void split_str(char* buf, size_t buf_size, char*** pos_list, int** size_list, int* len) {
     *len = count_str(buf, '.');
-    *size_list = malloc(*len * sizeof(long));
+    printf("split_str len %d\n", *len);
+    *size_list = malloc(*len * sizeof(int));
     *pos_list = malloc(*len * sizeof(char*));
 
-    long start_pos = (long)buf;
+    size_t start_pos = (size_t)buf;
     char symbol = ' ';
     char* ptr = NULL;
     for (int i = 0; i < *len; i++) {
         (*pos_list)[i] = buf;
-        ptr = strchr(buf, (int)symbol);
+        if (checkdebug(buf)) {
+            debug();
+        }
+        ptr = strchr(buf, (size_t)symbol);
         if (ptr == NULL) {
-            (*size_list)[i] =  buf_size-(long)buf+start_pos;
+            (*size_list)[i] =  (size_t)buf_size-(size_t)buf+start_pos;
         } else {
-            (*size_list)[i] = (long)ptr-(long)buf;
+            (*size_list)[i] = (size_t)ptr-(size_t)buf;
             buf = &ptr[1];
         }
     }
@@ -57,9 +79,9 @@ void split_str(char* buf, long buf_size, char*** pos_list, long** size_list, int
     
 int write_slices_to_files(char* buf, long file_size, int N, int M_prcs, int M_last_prcs) {
     int len = 0;
-    long* size_list = NULL;
+    int* size_list = NULL;
     char** pos_list = NULL;
-    split_str(buf, file_size, &pos_list, &size_list, &len);
+    split_str(buf, (size_t)file_size, &pos_list, &size_list, &len);
     int counter = 0;
 
     for (int j = 0; j < N-1; j++) {

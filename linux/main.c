@@ -16,16 +16,17 @@ static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 void* th_main(void* substrs_void) {
     char* substrs = (char*)substrs_void;
     int len = 0;
-    long* size_list = NULL;
+    int* size_list = NULL;
     char** pos_list = NULL;
-    printf("asdasdasdasdad\n");
+    // printf("asdasdasdasdad\n");
+    printf("INFO %s\n", (char*)substrs_void);
     split_str(substrs, strlen(substrs), &pos_list, &size_list, &len);
-    printf("len: %d\n", len);
+    // printf("len: %d\n", len);
     for (int i = 0; i < len; i++) {
         pthread_mutex_lock(&mutex);
         char* val = malloc(size_list[i]);
         strncpy(val, pos_list[i], size_list[i]);
-        printf("val: %s\n", val);
+        printf("%d val: %s   size: %d\n",i, val, size_list[i]);
         sum += atof(val);
         free(val);
         pthread_mutex_unlock(&mutex);
@@ -81,43 +82,44 @@ int main(int argc, char* argv[]) {
     printf("N - child processes: %d\n", N);
 
     int len = 0;
-    long* size_list = NULL;
+    int* size_list = NULL;
     char** pos_list = NULL;
-    split_str(buf, file_size, &pos_list, &size_list, &len);
-    printf("buf: %s\n", buf);
-    printf("len: %d\n", len);
+    split_str(buf, (size_t)file_size, &pos_list, &size_list, &len);
+    // printf("buf: %s\n", buf);
+    // printf("len: %d\n", len);
     for (int i =0;i<len;i++) {
-        printf("pop_list[%d] %.*s\n",i,(int)size_list[i],pos_list[i]);
+        // printf("pop_list[%d] %.*s\n",i,(int)size_list[i],pos_list[i]);
     }
     char** substrs = malloc(N * sizeof(char*));
     int counter = 0;
     int max_size_list = 0;
     for (int i =0 ; i<len; i++) {
-        printf("OPO %ld\n", size_list[i]);
+        // printf("OPO %d\n", size_list[i]);
         if (max_size_list < size_list[i]) {max_size_list = size_list[i];}
     }
-    printf("max_size_list %d\n", max_size_list);
+    // printf("max_size_list %d\n", max_size_list);
     for (int i = 0; i<N-1; i++) {
         substrs[i] = malloc(file_size * sizeof(char));
-        strncpy(substrs[i], pos_list[counter], size_list[counter]);
-        counter++;
-        strcat(substrs[i], " ");
-        for (int j = 1; j<M_prcs; j++) {
+        // strncpy(substrs[i], pos_list[counter], size_list[counter]);
+        // counter++;
+        // strcat(substrs[i], " ");
+        for (int j = 0; j<M_prcs; j++) {
             strncat(substrs[i], pos_list[counter], size_list[counter]);
             counter++;
-            if (j != size_list[i]-1) { strcat(substrs[i], " "); }
+            if (j != size_list[i]-1) { strcat(substrs[i], " ");}
         }
     }
 
     for (int i = N-1; i<N; i++) {
         substrs[i] = malloc(file_size * sizeof(char));
-        strncpy(substrs[i], pos_list[counter], size_list[counter]);
-        counter++;
-        strcat(substrs[i], " ");
-        for (int j = 1; j<M_last_prcs; j++) {
+        printf("HERE %s %s %d\n", substrs[i], pos_list[counter], size_list[counter]);
+        // strncpy(substrs[i], pos_list[counter], size_list[counter]);
+        // counter++;
+        // strcat(substrs[i], " ");
+        for (int j = 0; j<M_last_prcs; j++) {
             strncat(substrs[i], pos_list[counter], size_list[counter]);
             counter++;
-            if (j != size_list[i]-1) { strcat(substrs[i], " "); }
+            if (j != size_list[i]-1) { strcat(substrs[i], " ");}
         }
     }
     for (int i = 0; i<N; i++) {
@@ -139,11 +141,11 @@ int main(int argc, char* argv[]) {
         free(th_ret);
     }
 
-    // for (int i = 0; i<N; i++) {
-    //     free(substrs[i]);
-    // }
-    // free(substrs);
-    // free(buf);
+    for (int i = 0; i<N; i++) {
+        free(substrs[i]);
+    }
+    free(substrs);
+    free(buf);
     // free(id);
     printf("sum is %f\n", sum);
     // int counter = 0;
