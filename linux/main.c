@@ -6,10 +6,12 @@
 #include <sys/wait.h>
 #include <ctype.h>
 #include <pthread.h>
+#include "calcDist.c"
 #include "itoa.c"
 #include "module.c"
 
-#define ARGC 4
+#define ARGC 3
+#define DELAY 10
 double sum = 0;
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -77,21 +79,8 @@ int read_file_to_buf(FILE* fp, long file_size, char** buf) {
     return 0;
 }
 
-void calcDist(int* N, int* M, int* M_prcs, int* M_last_prcs) {
-    if ((*N) > (*M)/2) {
-        (*N) = (*M)/2;
-        printf("Warning: N = M//2\n");
-    }
-    *M_prcs = (*M) / (*N);
-    *M_last_prcs = (*M) - ((*N)-1)*((*M) / (*N));
-
-    printf("M - data size: %d\n", *M);
-    printf("N - child processes: %d\n", *N);
-    printf("M_prcs: %d\n", *M_prcs);
-    printf("M_last_prcs: %d\n", *M_last_prcs);
-}
-
 void* th_main(void* substrs_void) {
+    sleep(DELAY);
     char* substrs = (char*)substrs_void;
     int len = 0;
     int* size_list = NULL;
@@ -153,8 +142,8 @@ int main(int argc, char* argv[]) {
         print_error_msg("file doesn`t exist");
         return 1;
     }
-
-    char* delay_str = argv[3];
+    printf("PID: %d\n", getpid());
+    // char* delay_str = argv[3];
 
     long file_size = get_file_size(fp);
     char* buf = NULL;
@@ -203,6 +192,7 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i<N; i++) {
         pthread_create(&id[i], NULL, th_main, (void *)(substr[i])); // ERROR
     }
+    sleep(DELAY);
     for (int i = 0; i<N; i++) {
         void* th_ret;
         pthread_join(id[i], &th_ret);
