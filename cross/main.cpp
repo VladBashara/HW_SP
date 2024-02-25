@@ -3,7 +3,6 @@
 #include <errno.h>
 #include <string.h>
 #include <ctype.h>
-#include <pthread.h>
 #include <semaphore>
 #include <iostream>
 #include "itoa.c"
