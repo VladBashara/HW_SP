@@ -6,7 +6,6 @@
 #include <sys/wait.h>
 #include <ctype.h>
 #include <pthread.h>
-#include "calcDist.c"
 #include "itoa.c"
 #include "module.c"
 

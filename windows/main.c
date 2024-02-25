@@ -5,7 +5,6 @@
 #include <synchapi.h>
 #include <ctype.h>
 #include <Windows.h>
-#include "calcDist.c"
 #include "itoa.c"
 #include "module.c"
 
@@ -24,7 +23,6 @@ int read_file_to_buf(FILE* fp, long file_size, char** buf) {
         print_error_msg("Can`t close the file");
         return 1;
     }
-    free(*buf);
     return 0;
 }
 

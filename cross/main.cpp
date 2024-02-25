@@ -8,7 +8,6 @@
 #include <pthread.h>
 #include <semaphore>
 #include <iostream>
-#include "calcDist.c"
 #include "itoa.c"
 #include "module.cpp"
 
