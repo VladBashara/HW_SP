@@ -51,7 +51,6 @@ DWORD th_main(LPVOID arg) {
         char* val = malloc(size_list[i]);
         strncpy(val, pos_list[i], size_list[i]);
         sum += atof(val);
-        printf("THREAD atof %f\n", atof(val));
         free(val);
     }
     // pthread_mutex_unlock(&mutex);
@@ -139,7 +138,6 @@ int main(int argc, char* argv[]) {
         DWORD id;
         th_handle[i] = CreateThread(NULL, 0, th_main, &arg[i], 0, &id);
     }
-    printf("LOL\n");
     Sleep(1000*atoi(delay_str));
     for (int i = 0; i<N; i++) {
         // pthread_join(id[i], &th_ret);
