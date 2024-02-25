@@ -1,12 +1,9 @@
 #include <stdio.h>
-// #include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-// #include <sys/wait.h>
 #include <synchapi.h>
 #include <ctype.h>
-// #include <pthread.h>
 #include <Windows.h>
 #include "calcDist.c"
 #include "itoa.c"
@@ -27,6 +24,7 @@ int read_file_to_buf(FILE* fp, long file_size, char** buf) {
         print_error_msg("Can`t close the file");
         return 1;
     }
+    free(*buf);
     return 0;
 }
 
@@ -36,7 +34,6 @@ struct ARG {
 };
 
 double sum = 0;
-// static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 CRITICAL_SECTION cs;
 DWORD th_main(LPVOID arg) {
     Sleep(1000*((struct ARG*)arg)->delay);
@@ -45,7 +42,6 @@ DWORD th_main(LPVOID arg) {
     long* size_list = NULL;
     char** pos_list = NULL;
     split_str(substrs, strlen(substrs), &pos_list, &size_list, &len);
-    // pthread_mutex_lock(&mutex);
     EnterCriticalSection(&cs);
     for (int i = 0; i < len; i++) {
         char* val = malloc(size_list[i]);
@@ -53,11 +49,7 @@ DWORD th_main(LPVOID arg) {
         sum += atof(val);
         free(val);
     }
-    // pthread_mutex_unlock(&mutex);
     LeaveCriticalSection(&cs);
-    // int* r = malloc(sizeof(int));
-    // *r = 12;
-    // pthread_exit(r);
     ExitThread(0);
 }
 
@@ -127,20 +119,17 @@ int main(int argc, char* argv[]) {
 
     get_substr(&substr, &buf, file_size, N, M_prcs, M_last_prcs);
     
-    // pthread_t* id = malloc(N * sizeof(pthread_t));
     InitializeCriticalSection(&cs);
     struct ARG* arg = malloc(N * sizeof(struct ARG));
     HANDLE* th_handle = malloc(N * sizeof(HANDLE));
     for (int i = 0; i<N; i++) {
         arg[i].delay = atoi(delay_str);
         arg[i].substr = substr[i];
-        // pthread_create(&id[i], NULL, th_main, (void *)&(arg[i]));
         DWORD id;
         th_handle[i] = CreateThread(NULL, 0, th_main, &arg[i], 0, &id);
     }
     Sleep(1000*atoi(delay_str));
     for (int i = 0; i<N; i++) {
-        // pthread_join(id[i], &th_ret);
         WaitForSingleObject(th_handle[i], INFINITE);
     }
     for (int i = 0; i<N; i++) {
@@ -150,7 +139,6 @@ int main(int argc, char* argv[]) {
     free(buf);
     free(arg);
     free(th_handle);
-    // free(id);
     DeleteCriticalSection(&cs);
     printf("\nsum is %f\n", sum);
     return 0;
