@@ -75,53 +75,6 @@ void split_str(char* buf, size_t buf_size, char*** pos_list, int** size_list, in
         }
     }
 }
-    
-int write_slices_to_files(char* buf, long file_size, int N, int M_prcs, int M_last_prcs) {
-    int len = 0;
-    int* size_list = NULL;
-    char** pos_list = NULL;
-    split_str(buf, (size_t)file_size, &pos_list, &size_list, &len);
-    int counter = 0;
-
-    for (int j = 0; j < N-1; j++) {
-        char file[] = "splitted_arrays/";
-        FILE* fp = fopen(strcat(file, i_to_a(j+1)), "wb"); if (fp == NULL) { return 1; }
-        for (int i = 0; i < M_prcs; i++) {
-            fwrite(pos_list[counter], 1, size_list[counter], fp); if (ferror(fp)) { return 1; }
-            counter++;
-            if (i != M_prcs-1) { fwrite(" ", 1, 1, fp); }
-        }
-        if (fclose(fp)) { return 1; }
-    }
-    char file[] = "splitted_arrays/";
-    FILE* fp = fopen(strcat(file, i_to_a(N)), "wb");
-    for (int i = 0; i < M_last_prcs; i++) {
-        fwrite(pos_list[counter], 1, size_list[counter], fp); if (ferror(fp)) { return 1; }
-        counter++;
-        if (i != M_last_prcs-1) { fwrite(" ", 1, 1, fp); if (ferror(fp)) { return 1; } }
-    }
-    free(size_list);
-    if (fclose(fp)) { return 1; }
-    return 0;
-}
-
-void waiting_all_proccesses(int N, char* delay_str) {
-    int ret_code;
-    sleep(4*atoi(delay_str));
-    for (int j = 0; j < N; j++) {
-        pid_t ret_wait = wait(&ret_code);
-    }
-}
-
-void calling_proccesses(int N, char* delay_str) {
-    for (int i = 0; i < N; i++) {
-        pid_t ret_fork = fork();
-        if (ret_fork == 0) {
-            char* argv[3] = {i_to_a(i+1), delay_str, NULL};
-            execve("./child", argv, NULL);
-        }
-    }
-}
 
 void calcDist(int* N, int* M, int* M_prcs, int* M_last_prcs) {
     if ((*N) > (*M)/2) {

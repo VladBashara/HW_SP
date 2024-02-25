@@ -3,17 +3,18 @@
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-#include <sys/wait.h>
+// #include <sys/wait.h>
 #include <ctype.h>
 #include <pthread.h>
 #include <semaphore>
 #include <iostream>
 #include "itoa.c"
 #include "module.cpp"
+#include <cstdlib>
 
 
 #if defined(__WIN32)
-    #define THROW_ERROR_MSG throw_error_msg_windows
+    #define THROW_ERROR_MSG throw_error_fmsg_windows
     void throw_error_msg_windows(const char* add_msg) {
         std::string str_number = GetLastError();
         LPSTR message;
@@ -31,7 +32,6 @@
         throw std::runtime_error(str_number + ": " + str_error + add_msg);
     }
 #endif
-
 
 int read_file_to_buf(FILE* fp, long file_size, char** buf) {
     *buf = (char*)malloc((file_size+1) * sizeof(char));
@@ -112,6 +112,7 @@ void get_substr(char*** substr, char** buf, long file_size, int N, int M_prcs, i
 #define ARGC 4
 int main(int argc, char* argv[]) {
     try {
+        
         if (argc != ARGC) {
         printf("ERROR: argc != %d\n", ARGC);
         return 1;
@@ -142,7 +143,7 @@ int main(int argc, char* argv[]) {
         get_substr(&substr, &buf, file_size, N, M_prcs, M_last_prcs);
         
         pthread_t* id = (pthread_t*)malloc(N * sizeof(pthread_t));
-        struct ARG arg[N];
+        struct ARG* arg = (struct ARG*)malloc(N * sizeof(struct ARG));
         for (int i = 0; i<N; i++) {
             arg[i].delay = atoi(delay_str);
             arg[i].substr = substr[i];
@@ -161,6 +162,7 @@ int main(int argc, char* argv[]) {
         free(substr);
         free(buf);
         free(id);
+        free(arg);
         printf("\nsum is %f\n", sum);
         return 0;
     }
