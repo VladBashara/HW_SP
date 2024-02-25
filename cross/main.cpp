@@ -3,7 +3,8 @@
 #include <errno.h>
 #include <string.h>
 #include <ctype.h>
-#include <semaphore>
+// #include <semaphore>
+#include "semaphore.h"
 #include <iostream>
 #include "itoa.c"
 #include "module.cpp"
@@ -14,6 +15,7 @@
 
 #if defined(_WIN32)
     #include <windows.h>
+    #define PRINT_PROCESS_ID printf("PID: %lu\n", GetCurrentProcessId());
     #define THROW_ERROR_MSG throw_error_msg_windows
     void throw_error_msg_windows(const char* add_msg) {
         char buf[1000];
@@ -26,6 +28,8 @@
         throw std::runtime_error(str_number + ": " + str_error + add_msg);
     }
 #else
+    #include <process.h>
+    #define PRINT_PROCESS_ID printf("PID: %d\n", getpid());
     #define THROW_ERROR_MSG throw_error_msg_linux
     void throw_error_msg_linux(const char* add_msg) {
         std::string str_number = i_to_a(errno);
@@ -57,7 +61,8 @@ struct ARG {
 };
 
 double sum = 0;
-std::binary_semaphore sem{1};
+// std::binary_semaphore sem{1};
+cyan::binary_semaphore sem{1};
 void th_main(void* arg) {
     // sleep(((struct ARG*)arg)->delay);
     std::this_thread::sleep_for(std::chrono::seconds(((struct ARG*)arg)->delay));
@@ -114,7 +119,6 @@ void get_substr(char*** substr, char** buf, long file_size, int N, int M_prcs, i
 #define ARGC 4
 int main(int argc, char* argv[]) {
     try {
-        
         if (argc != ARGC) {
         printf("ERROR: argc != %d\n", ARGC);
         return 1;
@@ -123,7 +127,7 @@ int main(int argc, char* argv[]) {
         if (fp == NULL) {
             THROW_ERROR_MSG("cant open file");
         }
-        printf("PID: %d\n", getpid());
+        PRINT_PROCESS_ID
         char* delay_str = argv[3];
 
         long file_size = get_file_size(fp);
@@ -144,7 +148,7 @@ int main(int argc, char* argv[]) {
 
         get_substr(&substr, &buf, file_size, N, M_prcs, M_last_prcs);
         
-        pthread_t* id = (pthread_t*)malloc(N * sizeof(pthread_t));
+        // pthread_t* id = (pthread_t*)malloc(N * sizeof(pthread_t));
         std::vector<std::thread> th;
         struct ARG* arg = (struct ARG*)malloc(N * sizeof(struct ARG));
         for (int i = 0; i<N; i++) {
@@ -168,7 +172,7 @@ int main(int argc, char* argv[]) {
         }
         free(substr);
         free(buf);
-        free(id);
+        // free(id);
         free(arg);
         printf("\nsum is %f\n", sum);
         return 0;
