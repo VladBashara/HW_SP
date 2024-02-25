@@ -56,30 +56,32 @@ void* th_main(void* arg) {
     pthread_exit(r);
 }
 
-#define OS_SIZE_TYPE 64
-#if OC_OS_SIZE_TYPE == 64
-#define OS_SIZE long long
+#define MACHINE_WORD_SIZE 64
+#if MACHINE_WORD_SIZE == 64
+    # define MACHINE_WORD_TYPE long long
 #else
-#define OS_SIZE int
+    #define MACHINE_WORD_TYPE int
 #endif
 
 void get_substr(char*** substr, char** buf, long file_size, int N, int M_prcs, int M_last_prcs) {
     if ((*buf)[file_size-1] != ' ') {
-        char* new_buf = malloc((file_size + 1 + 1) * sizeof(char));
+        char* new_buf = (char*)malloc((file_size+ 1 + 1) * sizeof(char));
         strncpy(new_buf, *buf, file_size);
-        strcat(new_buf, " \0");
+        strncpy(&new_buf[file_size], " ", 1);
+        strncpy(&new_buf[file_size+1], "\0", 1);
         free(*buf);
-        *buf = malloc((file_size + 1 + 1) * sizeof(char));
+        *buf = (char*)malloc((file_size + 1 + 1) * sizeof(char));
         strncpy(*buf, new_buf, file_size + 1 + 1);
+        free(new_buf);
     }
-    OS_SIZE idx = (long)(*buf)-1;
-    OS_SIZE start = (long)(*buf);
-    OS_SIZE const start_const = (long)(*buf);
+    MACHINE_WORD_TYPE idx = (MACHINE_WORD_TYPE)(*buf)-1;
+    MACHINE_WORD_TYPE start = (MACHINE_WORD_TYPE)(*buf);
+    MACHINE_WORD_TYPE const start_const = (MACHINE_WORD_TYPE)(*buf);
     int jmp_counter = 0;
     for (int j = 0; j < N; j++) {
         if (j == N-1) { jmp_counter = M_last_prcs; } else { jmp_counter = M_prcs; }
         for (int i = 0; i < jmp_counter; i++) {
-            idx = (long)strchr(&(*buf)[idx+1-start_const], (long)' ');
+            idx = (MACHINE_WORD_TYPE)strchr(&(*buf)[idx+1-start_const], (long)' ');
         }
         strncpy((*substr)[j], &((*buf)[start-start_const]), idx-start);
         start = idx + 1;
