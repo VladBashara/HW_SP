@@ -12,8 +12,9 @@
 #include "module.cpp"
 #include <cstdlib>
 #include <chrono>
-#include <windows.h>
+// #include <windows.h>
 #include <thread>
+#include <vector>
 
 #if defined(_WIN32)
     #define THROW_ERROR_MSG throw_error_msg_windows
