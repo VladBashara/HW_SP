@@ -28,7 +28,7 @@
         throw std::runtime_error(str_number + ": " + str_error + add_msg);
     }
 #else
-    #include <process.h>
+    #include <unistd.h>
     #define PRINT_PROCESS_ID printf("PID: %d\n", getpid());
     #define THROW_ERROR_MSG throw_error_msg_linux
     void throw_error_msg_linux(const char* add_msg) {
