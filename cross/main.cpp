@@ -12,9 +12,6 @@
 #include "itoa.c"
 #include "module.cpp"
 
-#define ARGC 4
-double sum = 0;
-std::binary_semaphore sem{1};
 
 #if defined(__WIN32)
     #define THROW_ERROR_MSG throw_error_msg_windows
@@ -59,6 +56,8 @@ struct ARG {
     char* substr;
 };
 
+double sum = 0;
+std::binary_semaphore sem{1};
 void* th_main(void* arg) {
     sleep(((struct ARG*)arg)->delay);
     char* substrs = (char*)(((struct ARG*)arg)->substr);
@@ -111,6 +110,7 @@ void get_substr(char*** substr, char** buf, long file_size, int N, int M_prcs, i
     }
 }
 
+#define ARGC 4
 int main(int argc, char* argv[]) {
     try {
         if (argc != ARGC) {
