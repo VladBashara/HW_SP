@@ -11,12 +11,15 @@
 #include "itoa.c"
 #include "module.cpp"
 #include <cstdlib>
+#include <chrono>
+#include <windows.h>
+#include <thread>
 
-
-#if defined(__WIN32)
-    #define THROW_ERROR_MSG throw_error_fmsg_windows
+#if defined(_WIN32)
+    #define THROW_ERROR_MSG throw_error_msg_windows
     void throw_error_msg_windows(const char* add_msg) {
-        std::string str_number = GetLastError();
+        char buf[1000];
+        std::string str_number = itoa(GetLastError(), buf, 10);
         LPSTR message;
         FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER, NULL, GetLastError(),
         MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT), (LPSTR)&message, 0, NULL);
@@ -57,8 +60,9 @@ struct ARG {
 
 double sum = 0;
 std::binary_semaphore sem{1};
-void* th_main(void* arg) {
-    sleep(((struct ARG*)arg)->delay);
+void th_main(void* arg) {
+    // sleep(((struct ARG*)arg)->delay);
+    std::this_thread::sleep_for(std::chrono::seconds(((struct ARG*)arg)->delay));
     char* substrs = (char*)(((struct ARG*)arg)->substr);
     int len = 0;
     int* size_list = NULL;
@@ -72,9 +76,9 @@ void* th_main(void* arg) {
         free(val);
     }
     sem.release();
-    int* r = (int*)malloc(sizeof(int));
-    *r = 12;
-    pthread_exit(r);
+    // int* r = (int*)malloc(sizeof(int));
+    // *r = 12;
+    // pthread_exit(r);
 }
 
 #define MACHINE_WORD_SIZE 64
@@ -143,17 +147,22 @@ int main(int argc, char* argv[]) {
         get_substr(&substr, &buf, file_size, N, M_prcs, M_last_prcs);
         
         pthread_t* id = (pthread_t*)malloc(N * sizeof(pthread_t));
+        std::vector<std::thread> th;
         struct ARG* arg = (struct ARG*)malloc(N * sizeof(struct ARG));
         for (int i = 0; i<N; i++) {
             arg[i].delay = atoi(delay_str);
             arg[i].substr = substr[i];
-            pthread_create(&id[i], NULL, th_main, (void *)&(arg[i]));
+            // pthread_create(&id[i], NULL, th_main, (void *)&(arg[i]));
+            th.emplace_back([=](){th_main(&arg[i]);});
+
         }
-        sleep(atoi(delay_str));
+        // sleep(atoi(delay_str));
+        std::this_thread::sleep_for(std::chrono::seconds(atoi(delay_str)));
         for (int i = 0; i<N; i++) {
-            void* th_ret;
-            pthread_join(id[i], &th_ret);
-            free(th_ret);
+            th[i].join();
+            // void* th_ret;
+            // pthread_join(id[i], &th_ret);
+            // free(th_ret);
         }
 
         for (int i = 0; i<N; i++) {
