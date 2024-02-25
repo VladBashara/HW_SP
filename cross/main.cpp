@@ -1,9 +1,7 @@
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <errno.h>
 #include <string.h>
-// #include <sys/wait.h>
 #include <ctype.h>
 #include <pthread.h>
 #include <semaphore>
@@ -12,11 +10,11 @@
 #include "module.cpp"
 #include <cstdlib>
 #include <chrono>
-// #include <windows.h>
 #include <thread>
 #include <vector>
 
 #if defined(_WIN32)
+    #include <windows.h>
     #define THROW_ERROR_MSG throw_error_msg_windows
     void throw_error_msg_windows(const char* add_msg) {
         char buf[1000];
