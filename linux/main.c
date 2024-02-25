@@ -10,9 +10,6 @@
 #include "itoa.c"
 #include "module.c"
 
-#define ARGC 4
-double sum = 0;
-static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 int read_file_to_buf(FILE* fp, long file_size, char** buf) {
     *buf = malloc((file_size+1) * sizeof(char));
@@ -36,6 +33,8 @@ struct ARG {
     char* substr;
 };
 
+double sum = 0;
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 void* th_main(void* arg) {
     sleep(((struct ARG*)arg)->delay);
     char* substrs = (char*)(((struct ARG*)arg)->substr);
@@ -88,6 +87,7 @@ void get_substr(char*** substr, char** buf, long file_size, int N, int M_prcs, i
     }
 }
 
+#define ARGC 4
 int main(int argc, char* argv[]) {
 
     if (argc != ARGC) {

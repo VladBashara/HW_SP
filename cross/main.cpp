@@ -116,56 +116,54 @@ int main(int argc, char* argv[]) {
         if (argc != ARGC) {
         printf("ERROR: argc != %d\n", ARGC);
         return 1;
-    }
-    FILE* fp = fopen(argv[1], "rb");
-    if (fp == NULL) {
-        THROW_ERROR_MSG("cant open file");
-        // print_error_msg("file doesn`t exist");
-        // return 1;
-    }
-    printf("PID: %d\n", getpid());
-    char* delay_str = argv[3];
+        }
+        FILE* fp = fopen(argv[1], "rb");
+        if (fp == NULL) {
+            THROW_ERROR_MSG("cant open file");
+        }
+        printf("PID: %d\n", getpid());
+        char* delay_str = argv[3];
 
-    long file_size = get_file_size(fp);
-    char* buf = NULL;
-    if (read_file_to_buf(fp, file_size, &buf)) { free(buf); THROW_ERROR_MSG("read_file_to_buf"); }
+        long file_size = get_file_size(fp);
+        char* buf = NULL;
+        if (read_file_to_buf(fp, file_size, &buf)) { free(buf); THROW_ERROR_MSG("read_file_to_buf"); }
 
-    int N = atoi(argv[2]);
-    int M = count_str(buf, '.');
-    if (M < 2) { free(buf); THROW_ERROR_MSG("ERROR: M < 2\n"); }
-    int M_prcs;
-    int M_last_prcs;
-    calcDist(&N, &M, &M_prcs, &M_last_prcs);
-    
-    char** substr = (char**)malloc(N * sizeof(char*));
-    for (int i = 0; i < N; i++) {
-        substr[i] = (char*)calloc(file_size, sizeof(char));
-    }
+        int N = atoi(argv[2]);
+        int M = count_str(buf, '.');
+        if (M < 2) { free(buf); THROW_ERROR_MSG("ERROR: M < 2\n"); }
+        int M_prcs;
+        int M_last_prcs;
+        calcDist(&N, &M, &M_prcs, &M_last_prcs);
+        
+        char** substr = (char**)malloc(N * sizeof(char*));
+        for (int i = 0; i < N; i++) {
+            substr[i] = (char*)calloc(file_size, sizeof(char));
+        }
 
-    get_substr(&substr, &buf, file_size, N, M_prcs, M_last_prcs);
-    
-    pthread_t* id = (pthread_t*)malloc(N * sizeof(pthread_t));
-    struct ARG arg[N];
-    for (int i = 0; i<N; i++) {
-        arg[i].delay = atoi(delay_str);
-        arg[i].substr = substr[i];
-        pthread_create(&id[i], NULL, th_main, (void *)&(arg[i]));
-    }
-    sleep(atoi(delay_str));
-    for (int i = 0; i<N; i++) {
-        void* th_ret;
-        pthread_join(id[i], &th_ret);
-        free(th_ret);
-    }
+        get_substr(&substr, &buf, file_size, N, M_prcs, M_last_prcs);
+        
+        pthread_t* id = (pthread_t*)malloc(N * sizeof(pthread_t));
+        struct ARG arg[N];
+        for (int i = 0; i<N; i++) {
+            arg[i].delay = atoi(delay_str);
+            arg[i].substr = substr[i];
+            pthread_create(&id[i], NULL, th_main, (void *)&(arg[i]));
+        }
+        sleep(atoi(delay_str));
+        for (int i = 0; i<N; i++) {
+            void* th_ret;
+            pthread_join(id[i], &th_ret);
+            free(th_ret);
+        }
 
-    for (int i = 0; i<N; i++) {
-        free(substr[i]);
-    }
-    free(substr);
-    free(buf);
-    free(id);
-    printf("\nsum is %f\n", sum);
-    return 0;
+        for (int i = 0; i<N; i++) {
+            free(substr[i]);
+        }
+        free(substr);
+        free(buf);
+        free(id);
+        printf("\nsum is %f\n", sum);
+        return 0;
     }
     catch (std::exception &err) {
         std::cerr << err.what() << std::endl;
