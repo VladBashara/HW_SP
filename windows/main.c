@@ -87,7 +87,11 @@ void get_substr(char*** substr, char** buf, long file_size, int N, int M_prcs, i
 int main(int argc, char* argv[]) {
 
     if (argc != ARGC) {
-        printf("ERROR: argc != %d\n", ARGC);
+        // printf("ERROR: argc != %d\n", ARGC);
+        printf("Usage: %s <filename> <threads_number> <delay>\n", argv[0]);
+        printf("   <filename>: path to file with list of floats\n");
+        printf("   <threads_number>: number of child threads\n");
+        printf("   <delay>: delay in seconds\n");
         return 1;
     }
 
