@@ -61,8 +61,7 @@ struct ARG {
 };
 
 double sum = 0;
-// std::binary_semaphore sem{1};
-cyan::binary_semaphore sem{1};
+std::binary_semaphore sem{1};
 void th_main(void* arg) {
     // sleep(((struct ARG*)arg)->delay);
     std::this_thread::sleep_for(std::chrono::seconds(((struct ARG*)arg)->delay));
