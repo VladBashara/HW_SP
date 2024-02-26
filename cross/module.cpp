@@ -85,7 +85,7 @@ void calcDist(int* N, int* M, int* M_prcs, int* M_last_prcs) {
     *M_last_prcs = (*M) - ((*N)-1)*((*M) / (*N));
 
     printf("M - data size: %d\n", *M);
-    printf("N - child processes: %d\n", *N);
+    printf("N - child threads: %d\n", *N);
     printf("M_prcs: %d\n", *M_prcs);
     printf("M_last_prcs: %d\n", *M_last_prcs);
 }

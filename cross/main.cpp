@@ -120,7 +120,11 @@ void get_substr(char*** substr, char** buf, long file_size, int N, int M_prcs, i
 int main(int argc, char* argv[]) {
     try {
         if (argc != ARGC) {
-        printf("ERROR: argc != %d\n", ARGC);
+        // printf("ERROR: argc != %d\n", ARGC);
+        printf("Usage: %s <filename> <threads_number> <delay>\n", argv[0]);
+        printf("   <filename>: path to file with list of floats\n");
+        printf("   <threads_number>: number of child threads\n");
+        printf("   <delay>: delay in seconds\n");
         return 1;
         }
         FILE* fp = fopen(argv[1], "rb");
@@ -136,7 +140,7 @@ int main(int argc, char* argv[]) {
 
         int N = atoi(argv[2]);
         int M = count_str(buf, '.');
-        if (M < 2) { free(buf); THROW_ERROR_MSG("ERROR: M < 2\n"); }
+        if (M < 2) { free(buf); printf("ERROR: M < 2\n"); return 1; }
         int M_prcs;
         int M_last_prcs;
         calcDist(&N, &M, &M_prcs, &M_last_prcs);
